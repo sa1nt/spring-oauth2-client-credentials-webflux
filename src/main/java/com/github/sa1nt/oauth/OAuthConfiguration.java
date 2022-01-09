@@ -2,28 +2,46 @@ package com.github.sa1nt.oauth;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
-import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
-import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class OAuthConfiguration {
 
-    /**
-     * Allows all requests to pass.
-     */
     @Bean
-    public SecurityWebFilterChain securitygWebFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange()
-                .anyExchange().permitAll()
-                .and().build();
+    public OAuth2AuthorizedClientManager authorizedClientManager(
+            ClientRegistrationRepository clientRegistrationRepository,
+            OAuth2AuthorizedClientRepository authorizedClientRepository) {
+
+        return new DefaultOAuth2AuthorizedClientManager(
+                clientRegistrationRepository, authorizedClientRepository
+        );
     }
 
+    /**
+     * Works for Servlet stack. TBD: find out if works for Webflux stack.
+     */
     @Bean
-    WebClient webClient(ReactiveClientRegistrationRepository clientRegistrationRepository,
+    WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
+        var oauth2Client = new ServletOAuth2AuthorizedClientExchangeFilterFunction(
+                authorizedClientManager
+        );
+
+        return WebClient.builder()
+                .apply(oauth2Client.oauth2Configuration())
+                .build();
+    }
+
+    /**
+     * Works for Webflux stack. Doesn't work for Servlet stack.
+     */
+/*
+    @Bean
+    WebClient webClient_(ReactiveClientRegistrationRepository clientRegistrationRepository,
                         ServerOAuth2AuthorizedClientRepository authorizedClientRepository) {
         var oauth = new ServerOAuth2AuthorizedClientExchangeFilterFunction(
                 clientRegistrationRepository,
@@ -39,4 +57,5 @@ public class OAuthConfiguration {
                 .filter(oauth)
                 .build();
     }
+*/
 }
