@@ -1,4 +1,8 @@
-Investigating Spring Security autoconfiguration abilities for OAuth2. 
+# Investigating Spring Security autoconfiguration abilities for OAuth2. 
+
+See tags: 
+* `webflux` -- on pure Reactive stack
+* `servlet_web-client` for magic WebClient working on Servlet stack
 
 Note: 
 * Client Credentials and Provider info in `application.yml` 
