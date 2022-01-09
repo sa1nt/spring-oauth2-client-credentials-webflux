@@ -6,7 +6,7 @@ Note:
 * Within a `ReactiveClientRegistrationRepository` autoconfigured instance
 
 That and a `ServerOAuth2AuthorizedClientExchangeFilterFunction` allow you to constuct a 
-`WebClient` that upon a request to a target URI: 
+`WebClient` that upon a request to a target URI will: 
 1. check if token for the URI exists and is not expired
 2. fetch the token if necessary
 3. call the target URI with the fetched or cached token
